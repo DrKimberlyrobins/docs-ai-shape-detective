@@ -189,6 +189,16 @@
 
     form.addEventListener('submit', event => event.preventDefault());
     form.querySelector('#train-tree').addEventListener('click', showTree);
+    form.querySelector('#new-training-group').addEventListener('click', () => {
+      const hasWork = data.questions.some(Boolean) || figures.some(({ id }) => data.rows[id].some(Boolean));
+      if (hasWork && !window.confirm('Start a new group? This clears the current group’s questions, answers, and trained tree on this device.')) return;
+      data = empty();
+      clearTree();
+      for (const field of form.querySelectorAll('[data-column], [data-figure]')) field.value = '';
+      status.textContent = 'The feature table is ready for the next group.';
+      saveTable();
+      form.elements['q-0'].focus();
+    });
 
     function showTree() {
       const table = tableState();
@@ -306,7 +316,10 @@
               }).join('')}</tr>`).join('')}</tbody>
             </table>
           </div>
-          <button type="button" class="primary" id="train-tree">Train and show the tree</button>
+          <div class="row">
+            <button type="button" class="primary" id="train-tree">Train and show the tree</button>
+            <button type="button" id="new-training-group">Start new group</button>
+          </div>
           <p id="training-status" role="status"></p>
         </form>
       </section>
