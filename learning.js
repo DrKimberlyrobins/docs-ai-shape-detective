@@ -89,6 +89,29 @@
       </ul>`;
   }
 
+  function questionSummary(tree, columns, rows) {
+    const used = new Set();
+    function visit(node) {
+      if (node.labels) return;
+      used.add(node.column);
+      visit(node.yes);
+      visit(node.no);
+    }
+    visit(tree);
+
+    return `<section class="no-print" aria-labelledby="training-questions-heading">
+      <h3 id="training-questions-heading">Questions and what the tree used</h3>
+      <ul>${columns.map(column => {
+        const status = used.has(column) ? 'Used in the tree'
+          : new Set(rows.map(row => row.values[column])).size === 1
+            ? 'Left out. All eight figures had the same answer.'
+            : 'Left out. The other questions already made the useful splits.';
+        return `<li><strong>Question ${column + 1}.</strong> ${html(data.questions[column].trim())}
+          <br><small>${status}</small></li>`;
+      }).join('')}</ul>
+    </section>`;
+  }
+
   function mount(root) {
     const form = root.querySelector('#training-form');
     const output = root.querySelector('#training-output');
@@ -201,6 +224,7 @@
           <summary>Read the branches as text</summary>
           ${treeView(model)}
         </details>
+        ${questionSummary(model, columns, rows)}
       </section>
       <section class="panel">
         <h2>Test a mystery card</h2>
